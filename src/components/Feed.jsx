@@ -12,9 +12,10 @@ const Feed = () => {
   // console.log(selectedCategory);
   useEffect(() => {
     setVideos([]);
-    fetchFromAPI(`search?part=snippet&q=${selectedCategory}`).then((data) =>
-      setVideos(data.items)
-    );
+    console.log("Awaiting Videos on homepage");
+    fetchFromAPI(
+      `search?part=snippet%2Cid&regionCode=US&maxResults=50&order=date&q=${selectedCategory}`
+    ).then((data) => setVideos(data.items));
   }, [selectedCategory]);
   return (
     <Stack sx={{ flexDirection: { sx: "column", md: "row" } }}>

@@ -1,33 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import ReactPlayer from "react-player/youtube";
 import { Typography, Box, Stack } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Videos, Loader } from "./";
 import { fetchFromAPI } from "../utils/fetchFromAPI";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const VideoDetails = () => {
   const [videoDetail, setVideoDetail] = useState(null);
   const [videos, setVideos] = useState(null);
   const { id } = useParams();
-  const [watchProgress, setWatchProgress] = useState(0); // To store the watch time
-  const [isVideoComplete, setIsVideoComplete] = useState(false); // Track if video is fully watched
+
+  const [pointBalance, setPointBalance] = useState(0);
+  const [watchProgress, setWatchProgress] = useState(0); // Track progress
+
+  const previousTimeRef = useRef(0); // To track the previous watched time
+  const playerRef = useRef(null);
 
   console.log("Inside Video Details Component...");
   console.log(videos, videoDetail, id);
 
   // This function is called periodically as the video plays
   const handleProgress = (state) => {
-    setWatchProgress(state.played); // Updates watch progress
-    if (state.played >= 0.99) {
-      // Video is 99% watched
-      setIsVideoComplete(true);
-    }
-  };
+    const currentTime = state.playedSeconds;
+    const timeDifference = currentTime - previousTimeRef.current;
 
-  // Handle video end
-  const handleEnded = () => {
-    setIsVideoComplete(true); // Mark video as fully watched
+    // Update previous time
+    previousTimeRef.current = currentTime;
+
+    // If the user skips (i.e., the time jump is larger than expected, e.g., 5 seconds), reload the page
+    if (timeDifference > 5) {
+      toast("Skip detected, Reseting video progress ");
+
+      // Reset the player to start from the beginning
+      setWatchProgress(0);
+      playerRef.current.seekTo(0); // Resets the video to the beginning
+    }
+
+    setWatchProgress(state.played); // Update watch progress
+
+    if (parseFloat((state.played * 100).toFixed(2)) >= 99.85) {
+      toast("Video completely watched!");
+      setPointBalance(5);
+      localStorage.setItem("PointBalance", 5);
+    }
   };
 
   useEffect(() => {
@@ -61,20 +79,17 @@ const VideoDetails = () => {
         <Box flex={1}>
           <Box sx={{ width: "100%", position: "sticky", top: "86px" }}>
             <ReactPlayer
+              ref={playerRef}
               url={`https://www.youtube.com/watch?v=${id}`}
               className="react-player"
               controls
               onProgress={handleProgress} // Track progress
-              onEnded={handleEnded} // Detect when the video ends
+              // onEnded={handleEnded} // Detect when the video ends
             />
-            {/* <div style={{ color: "#fff", margintop: "10px" }}>
+            <div style={{ color: "#fff", margintop: "10px" }}>
               Watch Progress: {(watchProgress * 100).toFixed(2)}%
             </div>
-            {isVideoComplete && (
-              <div style={{ color: "green", margintop: "10px" }}>
-                Video completed!
-              </div>
-            )} */}
+            <ToastContainer />
             <Typography color="#fff" variant="h5" fontWeight="bold" p={2}>
               {title}
             </Typography>
