@@ -11,7 +11,7 @@ import {
 
 const App = () => {
   return (
-    <Box sx={{ backgroundColor: "#000" }}>
+    <Box sx={{ backgroundColor: "#21242D" }}>
       <Navbar />
 
       <Routes>

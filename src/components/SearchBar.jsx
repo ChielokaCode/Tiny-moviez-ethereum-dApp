@@ -48,7 +48,7 @@ const SearchBar = () => {
             backgroundColor: "#50a8c0",
             color: "#fff",
             borderRadius: "2rem",
-            fontSize: "0.5rem",
+            fontSize: "1rem",
             paddingLeft: "0.75rem",
             paddingRight: "0.75rem",
           }}
